@@ -2,6 +2,7 @@ import logging
 import flask
 import requests
 import pprint
+import os
 from .frontpage import render
 app = flask.Flask(__name__)
 
@@ -44,7 +45,7 @@ def article(doc):
 def search(**params):
     params["fl"]=["twitter.*","og.*","source.*", "when.*", "fb.*"]
     params["fq"]=["source.path:*", "when.date:NOW/DAY"]
-    response = requests.get("http://solr-1:8983/solr/text/select", params=params)
+    response = requests.get(os.environ["SOLRURL"] + "/solr/text/select", params=params)
     result = response.json()
     # cheaper pop from backend
     return list(reversed([article(d) for d in result["response"]["docs"]]))
@@ -56,7 +57,7 @@ def hello():
 
 if __name__ == '__main__':
     logger.info("starting")
-    app.run()
+    app.run(host=os.environ["FLASK_HOST"])
     logger.info("stopping")
 
 
